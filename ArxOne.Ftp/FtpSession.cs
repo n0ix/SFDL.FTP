@@ -88,13 +88,7 @@ namespace ArxOne.Ftp
         /// <value>
         /// The host address.
         /// </value>
-        private IPAddress HostAddress
-        {
-            get
-            {
-                return _ftpClient.ActiveTransferHost ?? _activeTransferHost;
-            }
-        }
+        private IPAddress HostAddress => _ftpClient.ActiveTransferHost ?? _activeTransferHost;
 
         // the session can be held by two different elements: FtpSessionHandle and specific Stream
         // the session handle can be implicit (using the Sequence() method) and needs to be released
@@ -121,10 +115,7 @@ namespace ArxOne.Ftp
         /// <summary>
         /// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
         /// </summary>
-        public void Dispose()
-        {
-            Disconnect();
-        }
+        public void Dispose() => Disconnect();
 
         /// <summary>
         /// Disposes the transport.
@@ -210,9 +201,7 @@ namespace ArxOne.Ftp
         /// <param name="connectTimeout">The timeout.</param>
         /// <param name="readWriteTimeout">The read write timeout.</param>
         private void Connect(TimeSpan connectTimeout, TimeSpan readWriteTimeout)
-        {
-            Process(() => ProcessConnect(connectTimeout, readWriteTimeout), "connecting to FTP server", "(Connect)");
-        }
+           => Process(() => ProcessConnect(connectTimeout, readWriteTimeout), "connecting to FTP server", "(Connect)");
 
         /// <summary>
         /// Processes the connect.
@@ -380,9 +369,7 @@ namespace ArxOne.Ftp
         /// <param name="parameters">The parameters.</param>
         /// <returns></returns>
         public FtpReply SendCommand(string command, params string[] parameters)
-        {
-            return SendCommand(ProtocolStream, command, parameters);
-        }
+            => SendCommand(ProtocolStream, command, parameters);
 
         private static readonly string[] CensoredParameters = { "****" };
 
@@ -394,10 +381,7 @@ namespace ArxOne.Ftp
         /// <param name="parameters">The parameters.</param>
         /// <returns></returns>
         public FtpReply SendCommand(Stream stream, string command, params string[] parameters)
-        {
-            return Process(() => ProcessSendCommand(stream, command, parameters), "sending FTP request",
-                command, parameters);
-        }
+            => Process(() => ProcessSendCommand(stream, command, parameters), "sending FTP request", command, parameters);
 
         /// <summary>
         /// Processes the send command.
@@ -419,20 +403,14 @@ namespace ArxOne.Ftp
         /// Reads the reply.
         /// </summary>
         /// <returns></returns>
-        public FtpReply ReadReply()
-        {
-            return ReadReply(ProtocolStream);
-        }
+        public FtpReply ReadReply() => ReadReply(ProtocolStream);
 
         /// <summary>
         /// Reads the reply.
         /// </summary>
         /// <param name="stream">The stream.</param>
         /// <returns></returns>
-        public FtpReply ReadReply(Stream stream)
-        {
-            return Process(() => ProcessReadReply(stream), "reading FTP reply", "(ReadReply)");
-        }
+        public FtpReply ReadReply(Stream stream) => Process(() => ProcessReadReply(stream), "reading FTP reply", "(ReadReply)");
 
         /// <summary>
         /// Processes the read reply.
@@ -528,10 +506,7 @@ namespace ArxOne.Ftp
         /// </summary>
         /// <param name="stream">The stream.</param>
         /// <param name="line">The line.</param>
-        public void WriteLine(Stream stream, string line)
-        {
-            Write(stream, line + Eol);
-        }
+        public void WriteLine(Stream stream, string line) => Write(stream, line + Eol);
 
         /// <summary>
         /// Writes the string.

@@ -23,7 +23,7 @@ namespace ArxOne.Ftp
         /// <value>
         /// The features.
         /// </value>
-        public IEnumerable<string> Features { get { return _features.Keys; } }
+        public IEnumerable<string> Features => _features.Keys;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="FtpServerFeatures"/> class.
@@ -64,10 +64,7 @@ namespace ArxOne.Ftp
         /// </summary>
         /// <param name="feature">The request feature.</param>
         /// <returns></returns>
-        public bool HasFeature(string feature)
-        {
-            return _features.ContainsKey(feature);
-        }
+        public bool HasFeature(string feature) => _features.ContainsKey(feature);
 
         /// <summary>
         /// Gets the feature parameters.

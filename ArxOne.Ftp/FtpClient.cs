@@ -167,9 +167,7 @@ namespace ArxOne.Ftp
         public TResult Process<TResult>(Func<FtpSessionHandle, TResult> action)
         {
             using (var handle = Session())
-            {
                 return action(handle);
-            }
         }
 
         /// <summary>
@@ -177,10 +175,7 @@ namespace ArxOne.Ftp
         /// </summary>
         /// <param name="path">The path.</param>
         /// <returns></returns>
-        public IList<string> List(FtpPath path)
-        {
-            return Process(handle => ProcessList(handle, path));
-        }
+        public IList<string> List(FtpPath path) => Process(handle => ProcessList(handle, path));
 
         /// <summary>
         /// Processes the list.
@@ -220,30 +215,21 @@ namespace ArxOne.Ftp
         /// </summary>
         /// <param name="path">The path.</param>
         /// <returns></returns>
-        private string EscapePath(string path)
-        {
-            return FtpPlatform.EscapePath(path);
-        }
+        private string EscapePath(string path) => FtpPlatform.EscapePath(path);
 
         /// <summary>
         /// Lists the entries.
         /// </summary>
         /// <param name="path">The path.</param>
         /// <returns></returns>
-        public IEnumerable<FtpEntry> ListEntries(FtpPath path)
-        {
-            return EnumerateEntries(path, List(path));
-        }
+        public IEnumerable<FtpEntry> ListEntries(FtpPath path) => EnumerateEntries(path, List(path));
 
         /// <summary>
         /// Lists the entries.
         /// </summary>
         /// <param name="path">The path.</param>
         /// <returns></returns>
-        public IEnumerable<FtpEntry> StatEntries(FtpPath path)
-        {
-            return EnumerateEntries(path, Stat(path));
-        }
+        public IEnumerable<FtpEntry> StatEntries(FtpPath path) => EnumerateEntries(path, Stat(path));
 
         /// <summary>
         /// Sends a STAT command.
@@ -292,9 +278,7 @@ namespace ArxOne.Ftp
         /// <param name="mode">The mode.</param>
         /// <returns></returns>
         public Stream Retr(FtpPath path, FtpTransferMode mode = FtpTransferMode.Binary)
-        {
-            return Process(handle => ProcessRetr(handle, path, mode));
-        }
+            => Process(handle => ProcessRetr(handle, path, mode));
 
         /// <summary>
         /// Processes the retr.
@@ -324,9 +308,7 @@ namespace ArxOne.Ftp
         /// <param name="mode">The mode.</param>
         /// <returns></returns>
         public Stream Stor(FtpPath path, FtpTransferMode mode = FtpTransferMode.Binary)
-        {
-            return Process(handle => ProcessStor(handle, path, mode));
-        }
+            => Process(handle => ProcessStor(handle, path, mode));
 
         /// <summary>
         /// Processes the stor.
@@ -395,29 +377,20 @@ namespace ArxOne.Ftp
         /// <param name="path">The path.</param>
         /// <param name="isDirectory">if set to <c>true</c> [is directory].</param>
         /// <returns></returns>
-        public bool Delete(FtpPath path, bool isDirectory)
-        {
-            return Delete(path, (bool?)isDirectory);
-        }
+        public bool Delete(FtpPath path, bool isDirectory) => Delete(path, (bool?)isDirectory);
 
         /// <summary>
         /// Deletes the specified path.
         /// </summary>
         /// <param name="path">The path.</param>
         /// <returns></returns>
-        public bool Delete(FtpPath path)
-        {
-            return Delete(path, null);
-        }
+        public bool Delete(FtpPath path) => Delete(path, null);
 
         /// <summary>
         /// Sends a MKD command (MaKe Directory).
         /// </summary>
         /// <param name="path">The path.</param>
-        public void Mkd(FtpPath path)
-        {
-            Process(handle => Expect(SendCommand(handle, "MKD", path.ToString()), 257));
-        }
+        public void Mkd(FtpPath path) => Process(handle => Expect(SendCommand(handle, "MKD", path.ToString()), 257));
 
         /// <summary>
         /// Sends RNFR / RNTO pair.
@@ -439,10 +412,7 @@ namespace ArxOne.Ftp
         /// </summary>
         /// <param name="path">The path.</param>
         /// <returns>The entry, or null if entry does not exist</returns>
-        public FtpEntry GetEntry(FtpPath path)
-        {
-            return Process(handle => ProcessGetEntry(handle, path));
-        }
+        public FtpEntry GetEntry(FtpPath path) => Process(handle => ProcessGetEntry(handle, path));
 
         private FtpEntry ProcessGetEntry(FtpSessionHandle handle, FtpPath path)
         {
@@ -462,10 +432,8 @@ namespace ArxOne.Ftp
         /// <param name="command">The command.</param>
         /// <param name="parameters">The parameters.</param>
         /// <returns></returns>
-        public FtpReply SendSingleCommand(string command, params string[] parameters)
-        {
-            return Process(handle => handle.Session.SendCommand(command, parameters));
-        }
+        public FtpReply SendSingleCommand(string command, params string[] parameters) 
+            => Process(handle => handle.Session.SendCommand(command, parameters));
 
         /// <summary>
         /// Sends a MLST command.
@@ -487,30 +455,21 @@ namespace ArxOne.Ftp
         /// </summary>
         /// <param name="path">The path.</param>
         /// <returns></returns>
-        public FtpEntry MlstEntry(FtpPath path)
-        {
-            return ParseMlsx(Mlst(path), path);
-        }
+        public FtpEntry MlstEntry(FtpPath path) => ParseMlsx(Mlst(path), path);
 
         /// <summary>
         /// Sends LIST command.
         /// </summary>
         /// <param name="path">The path.</param>
         /// <returns></returns>
-        public IList<string> Mlsd(FtpPath path)
-        {
-            return Process(handle => ProcessMlsd(handle, path));
-        }
+        public IList<string> Mlsd(FtpPath path) => Process(handle => ProcessMlsd(handle, path));
 
         /// <summary>
         /// Sends MLSD command, parses result.
         /// </summary>
         /// <param name="path">The path.</param>
         /// <returns></returns>
-        public IEnumerable<FtpEntry> MlsdEntries(FtpPath path)
-        {
-            return Mlsd(path).Select(m => ParseMlsx(m, path));
-        }
+        public IEnumerable<FtpEntry> MlsdEntries(FtpPath path) => Mlsd(path).Select(m => ParseMlsx(m, path));
 
 
         /// <summary>

@@ -28,7 +28,7 @@ namespace ArxOne.Ftp
         /// Gets or sets the root URI.
         /// </summary>
         /// <value>The URI.</value>
-        public Uri Uri { get; private set; }
+        public Uri Uri { get; }
 
         /// <summary>
         /// Gets or sets a value indicating whether this <see cref="FtpClientCore"/> is in passive mode.
@@ -87,7 +87,7 @@ namespace ArxOne.Ftp
         /// <value>
         /// The server features.
         /// </value>
-        public FtpServerFeatures ServerFeatures { get { return GetServerFeatures(null); } }
+        public FtpServerFeatures ServerFeatures => GetServerFeatures(null);
 
         /// <summary>
         /// Gets or sets the default encoding.
@@ -150,7 +150,8 @@ namespace ArxOne.Ftp
         /// Gets or sets the port.
         /// </summary>
         /// <value>The _port.</value>
-        public int Port { get; private set; }
+        public int Port { get;  }
+
         private readonly FtpProtocol _protocol;
 
         private class DatedFtpSession
@@ -268,9 +269,7 @@ namespace ArxOne.Ftp
         /// <returns></returns>
         internal void OnReply(ProtocolMessageEventArgs e)
         {
-            var onReceivedReply = Reply;
-            if (onReceivedReply != null)
-                onReceivedReply(this, e);
+            Reply?.Invoke(this, e);
         }
 
         /// <summary>
@@ -279,9 +278,7 @@ namespace ArxOne.Ftp
         /// <param name="e">The <see cref="ArxOne.Ftp.ProtocolMessageEventArgs"/> instance containing the event data.</param>
         internal void OnIOError(ProtocolMessageEventArgs e)
         {
-            var onIOError = IOError;
-            if (onIOError != null)
-                onIOError(this, e);
+            IOError?.Invoke(this, e);
         }
 
         /// <summary>
@@ -300,7 +297,7 @@ namespace ArxOne.Ftp
                 case FtpProtocol.FtpES:
                     return "ftpes";
                 default:
-                    throw new ArgumentOutOfRangeException("protocol");
+                    throw new ArgumentOutOfRangeException(nameof(protocol));
             }
         }
 
@@ -347,10 +344,7 @@ namespace ArxOne.Ftp
         /// <returns>
         ///   <c>true</c> if the specified feature has feature; otherwise, <c>false</c>.
         /// </returns>
-        internal bool HasServerFeature(string feature, FtpSession session)
-        {
-            return GetServerFeatures(session).HasFeature(feature);
-        }
+        internal bool HasServerFeature(string feature, FtpSession session) => GetServerFeatures(session).HasFeature(feature);
 
         /// <summary>
         /// Gets the protocol.
@@ -394,9 +388,7 @@ namespace ArxOne.Ftp
         /// </summary>
         public void OnSessionInitialized()
         {
-            var sessionInitialized = SessionInitialized;
-            if (sessionInitialized != null)
-                sessionInitialized(this, EventArgs.Empty);
+            SessionInitialized?.Invoke(this, EventArgs.Empty);
         }
 
         /// <summary>
@@ -405,19 +397,14 @@ namespace ArxOne.Ftp
         /// <param name="eventArgs">The <see cref="ArxOne.Ftp.CheckCertificateEventArgs"/> instance containing the event data.</param>
         public void OnCheckCertificate(CheckCertificateEventArgs eventArgs)
         {
-            var checkCertificate = CheckCertificate;
-            if (checkCertificate != null)
-                checkCertificate(this, eventArgs);
+            CheckCertificate?.Invoke(this, eventArgs);
         }
 
         /// <summary>
         /// Creates the session.
         /// </summary>
         /// <returns></returns>
-        private FtpSession CreateSession()
-        {
-            return new FtpSession(this, _protocol, _host, Port);
-        }
+        private FtpSession CreateSession() => new FtpSession(this, _protocol, _host, Port);
 
         /// <summary>
         /// Pops the available session.
@@ -447,10 +434,7 @@ namespace ArxOne.Ftp
         /// Uses a session.
         /// </summary>
         /// <returns></returns>
-        public FtpSessionHandle Session()
-        {
-            return new FtpSessionHandle(FindOrCreateSession());
-        }
+        public FtpSessionHandle Session() => new FtpSessionHandle(FindOrCreateSession());
 
         /// <summary>
         /// Releases the session.
@@ -459,9 +443,7 @@ namespace ArxOne.Ftp
         internal void ReleaseSession(FtpSession session)
         {
             lock (_sessionsLock)
-            {
                 _availableSessions.Enqueue(new DatedFtpSession { Date = DateTime.UtcNow, Session = session });
-            }
         }
 
         /// <summary>
@@ -513,10 +495,8 @@ namespace ArxOne.Ftp
         /// <param name="command">The command.</param>
         /// <param name="parameters">The parameters.</param>
         /// <returns></returns>
-        public FtpReply SendCommand(FtpSessionHandle sequence, string command, params string[] parameters)
-        {
-            return sequence.Session.SendCommand(command, parameters);
-        }
+        public FtpReply SendCommand(FtpSessionHandle sequence, string command, params string[] parameters) 
+            => sequence.Session.SendCommand(command, parameters);
 
         /// <summary>
         /// Expects the specified reply.

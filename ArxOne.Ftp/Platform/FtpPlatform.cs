@@ -30,10 +30,7 @@ namespace ArxOne.Ftp.Platform
         /// <param name="directoryLine">The directory line.</param>
         /// <param name="parent">The parent.</param>
         /// <returns></returns>
-        public virtual FtpEntry Parse(string directoryLine, FtpPath parent)
-        {
-            return ParseUnix(directoryLine, parent);
-        }
+        public virtual FtpEntry Parse(string directoryLine, FtpPath parent) => ParseUnix(directoryLine, parent);
 
         /// <summary>
         /// Parses the line.
@@ -144,11 +141,8 @@ namespace ArxOne.Ftp.Platform
         /// </summary>
         /// <param name="path">The path.</param>
         /// <returns></returns>
-        public virtual string EscapePath(string path)
-        {
-            return path;
-        }
-        
+        public virtual string EscapePath(string path) => path;
+
         /// <summary>
         /// Escapes the path.
         /// Provided at this level for convenience

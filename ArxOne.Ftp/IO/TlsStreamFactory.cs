@@ -15,7 +15,7 @@ namespace ArxOne.Ftp.IO
     /// <summary>
     /// Allows to create TlsStream, this MF internal class!
     /// </summary>
-    public class TlsStreamFactory
+    public static class TlsStreamFactory
     {
         private static Type _tlsStreamType;
 

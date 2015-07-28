@@ -19,7 +19,7 @@ namespace ArxOne.Ftp.Exceptions
         /// Gets or sets the code.
         /// </summary>
         /// <value>The code.</value>
-        public FtpReplyCode Code { get; private set; }
+        public FtpReplyCode Code { get; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="FtpException"/> class.

@@ -47,10 +47,7 @@ namespace ArxOne.Ftp
         /// <returns>
         /// A <see cref="System.String" /> that represents this instance.
         /// </returns>
-        public override string ToString()
-        {
-            return _path;
-        }
+        public override string ToString() => _path;
 
         /// <summary>
         /// Performs an implicit conversion from <see cref="System.String"/> to <see cref="FtpPath"/>.

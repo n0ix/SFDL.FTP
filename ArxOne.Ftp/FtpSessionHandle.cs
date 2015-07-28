@@ -22,7 +22,7 @@ namespace ArxOne.Ftp
         /// <summary>
         /// Gets the state.
         /// </summary>
-        public FtpSessionState State { get { return Session.State; } }
+        public FtpSessionState State => Session.State;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="FtpSessionHandle"/> class.

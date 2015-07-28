@@ -9,7 +9,6 @@ namespace ArxOne.Ftp.IO
     using System;
     using System.Net;
     using System.Net.Sockets;
-    using System.Threading;
 
     /// <summary>
     /// Extensions to Socket class
@@ -24,10 +23,7 @@ namespace ArxOne.Ftp.IO
         /// <param name="port">The port.</param>
         /// <param name="timeout">The timeout.</param>
         public static void Connect(this Socket socket, string host, int port, TimeSpan timeout)
-        {
-            AsyncConnect(socket, (s, a, o) => s.BeginConnect(host, port, a, o), timeout);
-            //AsyncConnect(() => socket.Connect(host, port), timeout);
-        }
+            => AsyncConnect(socket, (s, a, o) => s.BeginConnect(host, port, a, o), timeout);
 
         /// <summary>
         /// Connects the specified socket.
@@ -37,28 +33,7 @@ namespace ArxOne.Ftp.IO
         /// <param name="port">The port.</param>
         /// <param name="timeout">The timeout.</param>
         public static void Connect(this Socket socket, IPAddress[] addresses, int port, TimeSpan timeout)
-        {
-            AsyncConnect(socket, (s, a, o) => s.BeginConnect(addresses, port, a, o), timeout);
-            //AsyncConnect(() => socket.Connect(addresses, port), timeout);
-        }
-
-        /// <summary>
-        /// Async connexion.
-        /// </summary>
-        /// <param name="connect">The connect.</param>
-        /// <param name="timeout">The timeout.</param>
-        private static void AsyncConnect(Action connect, TimeSpan timeout)
-        {
-            var waitHandle = new EventWaitHandle(false, EventResetMode.ManualReset);
-            var thread = new Thread(delegate()
-                                        {
-                                            connect();
-                                            waitHandle.Set();
-                                        }
-                ) { Name = "Socket.AsyncConnect" };
-            thread.Start();
-            waitHandle.WaitOne(timeout);
-        }
+            => AsyncConnect(socket, (s, a, o) => s.BeginConnect(addresses, port, a, o), timeout);
 
         /// <summary>
         /// Asyncs the connect.
@@ -76,9 +51,11 @@ namespace ArxOne.Ftp.IO
                     socket.EndConnect(asyncResult);
                 }
                 catch (SocketException)
-                { }
+                {
+                }
                 catch (ObjectDisposedException)
-                { }
+                {
+                }
             }
         }
 
@@ -87,10 +64,8 @@ namespace ArxOne.Ftp.IO
         /// </summary>
         /// <param name="socket">The socket.</param>
         /// <param name="timeout">The timeout.</param>
-        public static Socket Accept(this Socket socket, TimeSpan timeout)
-        {
-            return AsyncAccept(socket, (s, a, o) => s.BeginAccept(a, o), timeout);
-        }
+        public static Socket Accept(this Socket socket, TimeSpan timeout) => AsyncAccept(socket, (s, a, o)
+            => s.BeginAccept(a, o), timeout);
 
         /// <summary>
         /// Asyncs the connect.
@@ -108,9 +83,11 @@ namespace ArxOne.Ftp.IO
                     return socket.EndAccept(asyncResult);
                 }
                 catch (SocketException)
-                { }
+                {
+                }
                 catch (ObjectDisposedException)
-                { }
+                {
+                }
             }
             return null;
         }

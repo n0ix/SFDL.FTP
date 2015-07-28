@@ -18,19 +18,19 @@ namespace ArxOne.Ftp
         /// Gets or sets the code.
         /// </summary>
         /// <value>The code.</value>
-        public int Code { get; private set; }
+        public int Code { get; }
 
         /// <summary>
         /// Gets the severity.
         /// </summary>
         /// <value>The severity.</value>
-        public FtpReplyCodeSeverity Severity { get { return (FtpReplyCodeSeverity)((Code / 100) * 100); } }
+        public FtpReplyCodeSeverity Severity => (FtpReplyCodeSeverity)((Code / 100) * 100);
 
         /// <summary>
         /// Gets the class.
         /// </summary>
         /// <value>The class.</value>
-        public FtpReplyCodeClass Class { get { return (FtpReplyCodeClass)(((Code / 10) % 10) * 10); } }
+        public FtpReplyCodeClass Class => (FtpReplyCodeClass)(((Code / 10) % 10) * 10);
 
         /// <summary>
         /// Gets a value indicating whether this instance is success.
@@ -38,10 +38,7 @@ namespace ArxOne.Ftp
         /// <value>
         /// 	<c>true</c> if this instance is success; otherwise, <c>false</c>.
         /// </value>
-        public bool IsSuccess
-        {
-            get { return Code < (int)FtpReplyCodeSeverity.TransientNegativeCompletion; }
-        }
+        public bool IsSuccess => Code < (int)FtpReplyCodeSeverity.TransientNegativeCompletion;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="FtpReplyCode"/> class.
@@ -57,18 +54,12 @@ namespace ArxOne.Ftp
         /// </summary>
         /// <param name="replyCode">The reply code.</param>
         /// <returns>The result of the conversion.</returns>
-        public static implicit operator int(FtpReplyCode replyCode)
-        {
-            return replyCode.Code;
-        }
+        public static implicit operator int(FtpReplyCode replyCode) => replyCode.Code;
 
         /// <summary>
         /// Converts to string
         /// </summary>
         /// <returns></returns>
-        public override string ToString()
-        {
-            return Code.ToString();
-        }
+        public override string ToString() => Code.ToString();
     }
 }

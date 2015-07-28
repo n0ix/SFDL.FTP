@@ -21,7 +21,7 @@ namespace ArxOne.Ftp.IO
 
         private Stream _innerStream;
 
-        protected virtual Stream InnerStream { get { return _innerStream; } }
+        protected virtual Stream InnerStream => _innerStream;
 
         private Socket _innerSocket;
 
@@ -185,10 +185,7 @@ namespace ArxOne.Ftp.IO
         /// <exception cref="T:System.IO.IOException">
         /// An I/O error occurs.
         /// </exception>
-        public override void Flush()
-        {
-            Process(() => InnerStream.Flush());
-        }
+        public override void Flush() => Process(() => InnerStream.Flush());
 
         /// <summary>
         /// Reads data from the <see cref="T:System.Net.Sockets.NetworkStream"/>.
@@ -227,10 +224,7 @@ namespace ArxOne.Ftp.IO
         /// 	<IPermission class="System.Security.Permissions.SecurityPermission, mscorlib, Version=2.0.3600.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" version="1" Flags="UnmanagedCode, ControlEvidence"/>
         /// 	<IPermission class="System.Diagnostics.PerformanceCounterPermission, System, Version=2.0.3600.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" version="1" Unrestricted="true"/>
         /// </PermissionSet>
-        public override int Read(byte[] buffer, int offset, int size)
-        {
-            return Process(() => BaseRead(buffer, offset, size));
-        }
+        public override int Read(byte[] buffer, int offset, int size) => Process(() => BaseRead(buffer, offset, size));
 
         /// <summary>
         /// Call to base.Read.
@@ -239,10 +233,7 @@ namespace ArxOne.Ftp.IO
         /// <param name="offset">The offset.</param>
         /// <param name="size">The size.</param>
         /// <returns></returns>
-        private int BaseRead(byte[] buffer, int offset, int size)
-        {
-            return InnerStream.Read(buffer, offset, size);
-        }
+        private int BaseRead(byte[] buffer, int offset, int size) => InnerStream.Read(buffer, offset, size);
 
         /// <summary>
         /// Writes data to the <see cref="T:System.Net.Sockets.NetworkStream"/>.
@@ -278,10 +269,7 @@ namespace ArxOne.Ftp.IO
         /// 	<IPermission class="System.Security.Permissions.SecurityPermission, mscorlib, Version=2.0.3600.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" version="1" Flags="UnmanagedCode, ControlEvidence"/>
         /// 	<IPermission class="System.Diagnostics.PerformanceCounterPermission, System, Version=2.0.3600.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" version="1" Unrestricted="true"/>
         /// </PermissionSet>
-        public override void Write(byte[] buffer, int offset, int size)
-        {
-            Process(() => BaseWrite(buffer, offset, size));
-        }
+        public override void Write(byte[] buffer, int offset, int size) => Process(() => BaseWrite(buffer, offset, size));
 
         /// <summary>
         /// Calls base.Write.
@@ -289,10 +277,7 @@ namespace ArxOne.Ftp.IO
         /// <param name="buffer">The buffer.</param>
         /// <param name="offset">The offset.</param>
         /// <param name="size">The size.</param>
-        private void BaseWrite(byte[] buffer, int offset, int size)
-        {
-            InnerStream.Write(buffer, offset, size);
-        }
+        private void BaseWrite(byte[] buffer, int offset, int size) => InnerStream.Write(buffer, offset, size);
 
         /// <summary>
         /// Sets the position within the current stream.
@@ -311,10 +296,7 @@ namespace ArxOne.Ftp.IO
         /// <exception cref="T:System.ObjectDisposedException">
         /// Methods were called after the stream was closed.
         /// </exception>
-        public override long Seek(long offset, SeekOrigin origin)
-        {
-            return InnerStream.Seek(offset, origin);
-        }
+        public override long Seek(long offset, SeekOrigin origin) => InnerStream.Seek(offset, origin);
 
         /// <summary>
         /// Sets the length of the current stream.
@@ -329,10 +311,7 @@ namespace ArxOne.Ftp.IO
         /// <exception cref="T:System.ObjectDisposedException">
         /// Methods were called after the stream was closed.
         /// </exception>
-        public override void SetLength(long value)
-        {
-            InnerStream.SetLength(value);
-        }
+        public override void SetLength(long value) => InnerStream.SetLength(value);
 
         /// <summary>
         /// Gets a value indicating whether the current stream supports reading.
@@ -340,10 +319,7 @@ namespace ArxOne.Ftp.IO
         /// <value></value>
         /// <returns>true if the stream supports reading; otherwise, false.
         /// </returns>
-        public override bool CanRead
-        {
-            get { return InnerStream.CanRead; }
-        }
+        public override bool CanRead => InnerStream.CanRead;
 
         /// <summary>
         /// Gets a value indicating whether the current stream supports seeking.
@@ -351,10 +327,7 @@ namespace ArxOne.Ftp.IO
         /// <value></value>
         /// <returns>true if the stream supports seeking; otherwise, false.
         /// </returns>
-        public override bool CanSeek
-        {
-            get { return InnerStream.CanSeek; }
-        }
+        public override bool CanSeek => InnerStream.CanSeek;
 
         /// <summary>
         /// Gets a value indicating whether the current stream supports writing.
@@ -362,10 +335,7 @@ namespace ArxOne.Ftp.IO
         /// <value></value>
         /// <returns>true if the stream supports writing; otherwise, false.
         /// </returns>
-        public override bool CanWrite
-        {
-            get { return InnerStream.CanWrite; }
-        }
+        public override bool CanWrite => InnerStream.CanWrite;
 
         /// <summary>
         /// Gets the length in bytes of the stream.
@@ -380,10 +350,7 @@ namespace ArxOne.Ftp.IO
         /// <exception cref="T:System.ObjectDisposedException">
         /// Methods were called after the stream was closed.
         /// </exception>
-        public override long Length
-        {
-            get { return InnerStream.Length; }
-        }
+        public override long Length => InnerStream.Length;
 
         /// <summary>
         /// Gets or sets the position within the current stream.

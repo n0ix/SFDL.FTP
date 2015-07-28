@@ -34,10 +34,7 @@ namespace ArxOne.Ftp.Platform
         /// <param name="directoryLine">The directory line.</param>
         /// <param name="parent">The parent.</param>
         /// <returns></returns>
-        public override FtpEntry Parse(string directoryLine, FtpPath parent)
-        {
-            return ParseLine(directoryLine, parent);
-        }
+        public override FtpEntry Parse(string directoryLine, FtpPath parent) => ParseLine(directoryLine, parent);
 
         /// <summary>
         /// Parses the line.
