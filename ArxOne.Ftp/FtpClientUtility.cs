@@ -23,14 +23,28 @@ namespace ArxOne.Ftp
         /// <summary>
         /// Opens a data stream.
         /// </summary>
-        /// <param name="session">The session handle.</param>
+        /// <param name="session">The session.</param>
         /// <param name="mode">The mode.</param>
         /// <returns></returns>
         public static FtpStream OpenDataStream(this FtpSession session, FtpTransferMode mode)
         {
             var client = session.Connection.Client;
-            return session.OpenDataStream(client.Passive, client.ConnectTimeout, client.ReadWriteTimeout, mode);
+            return session.OpenDataStream(client.Passive, client.ConnectTimeout, client.ReadWriteTimeout, mode, null);
         }
+
+        /// <summary>
+        /// Opens a data stream.
+        /// </summary>
+        /// <param name="session">The session handle.</param>
+        /// <param name="transferMode">The mode.</param>
+        /// <param name="streamMode">The stream mode.</param>
+        /// <returns></returns>
+        public static FtpStream OpenDataStream(this FtpSession session, FtpTransferMode transferMode, FtpStreamMode streamMode)
+        {
+            var client = session.Connection.Client;
+            return session.OpenDataStream(client.Passive, client.ConnectTimeout, client.ReadWriteTimeout, transferMode, streamMode);
+        }
+
 
         /// <summary>
         /// Sends LIST command.
