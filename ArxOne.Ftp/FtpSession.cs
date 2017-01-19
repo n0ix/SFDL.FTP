@@ -390,14 +390,54 @@ namespace ArxOne.Ftp
         /// <returns></returns>
         public FtpReply Expect(FtpReply reply, params int[] codes)
         {
-            if (!codes.Any(code => code == reply.Code))
+
+            int _count = 0;
+
+            while (!codes.Any(code => code == reply.Code))
+
             {
                 // When 214 is unexpected, it may create a command/reply inconsistency (a 1-reply shift)
                 // so the best option here is to disconnect, it will reset the command/reply pairs
-                if (reply.Code == 214)
+                if (reply.Code == 214) {
                     Connection.Disconnect();
-                ThrowException(reply);
+                    return reply;
+                }
+                else
+                {
+    
+                    if (_count >= 3)
+                    {
+                        ThrowException(reply);
+                    }
+                    else
+                    {
+
+                        if(reply.IssuedFtpCommand != null)
+                        {
+      
+                            if(reply.IssuedFtpCommand != "PASV")
+                            {
+                                reply = SendCommand(ProtocolStream, reply.IssuedFtpCommand, reply.IssuedFtpCommandParameters);
+                                _count += 1;
+                            }
+                            else
+                            {
+                                reply = SendCommand(ProtocolStream, "NOOP","");
+                                _count += 1;
+                            }
+
+                        }
+                        else
+                        {
+                            return reply;
+                        }
+
+                    }
+
+                }
+
             }
+
             return reply;
         }
 
@@ -434,7 +474,7 @@ namespace ArxOne.Ftp
         /// <param name="parameters">The parameters.</param>
         /// <returns></returns>
         public FtpReply SendCommand(string command, params string[] parameters)
-        {
+        {           
             return SendCommand(ProtocolStream, command, parameters);
         }
 
@@ -466,6 +506,8 @@ namespace ArxOne.Ftp
             var commandLine = GetCommandLine(command, parameters);
             WriteLine(stream, commandLine);
             var reply = ReadReply(stream);
+            reply.IssuedFtpCommand = command;
+            reply.IssuedFtpCommandParameters = parameters;
             return reply;
         }
 
@@ -532,11 +574,16 @@ namespace ArxOne.Ftp
         public static string GetCommandLine(string command, params string[] parameters)
         {
             var lineBuilder = new StringBuilder(command);
-            foreach (var parameter in parameters)
-            {
-                lineBuilder.Append(' ');
-                lineBuilder.Append(parameter);
-            }
+
+           // if(parameters != null)
+            //{
+                foreach (var parameter in parameters)
+                {
+                    lineBuilder.Append(' ');
+                    lineBuilder.Append(parameter);
+                }
+            //}
+
             return lineBuilder.ToString();
         }
 

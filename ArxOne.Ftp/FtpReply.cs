@@ -16,11 +16,24 @@ namespace ArxOne.Ftp
     [DebuggerDisplay("FTP {Code.Code} {Lines[0]}")]
     public class FtpReply
     {
+
+        /// <summary>
+        /// Gets or sets the code.
+        /// </summary>
+        /// <value>The issued FTPCommand for this FtpReply</value>
+        public string IssuedFtpCommand { get; set; }
+
+        /// <summary>
+        /// Gets or sets the code.
+        /// </summary>
+        /// <value>The issued FTPCommand Parameters for this FtpReply</value>
+        public string[] IssuedFtpCommandParameters { get; set; }
+
         /// <summary>
         /// Gets or sets the code.
         /// </summary>
         /// <value>The code.</value>
-        public FtpReplyCode Code { get; private set; }
+        public FtpReplyCode Code { get; set; }
 
         /// <summary>
         /// Gets or sets the lines.
