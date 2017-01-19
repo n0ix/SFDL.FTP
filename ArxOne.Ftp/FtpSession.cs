@@ -8,12 +8,12 @@ namespace ArxOne.Ftp
 {
     using System;
     using System.Collections.Generic;
+    using System.Globalization;
     using System.IO;
     using System.Linq;
     using System.Net;
     using System.Net.Security;
     using System.Net.Sockets;
-    using System.Security.Authentication;
     using System.Security.Cryptography.X509Certificates;
     using System.Text;
     using System.Text.RegularExpressions;
@@ -29,7 +29,8 @@ namespace ArxOne.Ftp
         /// Gets or sets the FTP session.
         /// </summary>
         /// <value>The FTP session.</value>
-        public FtpConnection Connection { get; }
+        public FtpConnection Connection { get; private set; }
+
 
         /// <summary>
         /// Gets the transport stream.
@@ -272,7 +273,7 @@ namespace ArxOne.Ftp
             if (stream is SslStream)
                 return stream;
             var sslStream = new SslStream(stream, false, CheckCertificateHandler);
-            sslStream.AuthenticateAsClient(Connection.Client.Uri.Host, null, Connection.Client.SslProtocols, false);
+            sslStream.AuthenticateAsClient(Connection.Client.Uri.Host, Connection.Client.ClientCertificates, Connection.Client.SslProtocols, false);
             return sslStream;
         }
 
@@ -292,7 +293,7 @@ namespace ArxOne.Ftp
 
         /// <summary>
         /// Initializes the protocol.
-        /// To be strict, SSL/TLS is not on the protocol level, 
+        /// To be strict, SSL/TLS is not on the protocol level,
         /// </summary>
         private void InitializeProtocol()
         {
@@ -307,7 +308,7 @@ namespace ArxOne.Ftp
                 case FtpProtocol.FtpS:
                     EnterSslProtocol();
                     break;
-                // FTPES informs first over a clear channel that it switches to 
+                // FTPES informs first over a clear channel that it switches to
                 case FtpProtocol.FtpES:
                     LeaveSslProtocol();
                     Expect(SendCommand(Connection.ProtocolStream, "AUTH", "TLS"), 234);
@@ -601,12 +602,15 @@ namespace ArxOne.Ftp
         /// Checks the protection.
         /// </summary>
         /// <param name="requiredChannelProtection">The required channel protection.</param>
-        public void CheckProtection(FtpProtection requiredChannelProtection)
+        /// <param name="bufferSize">Size of the buffer.</param>
+        public void CheckProtection(FtpProtection requiredChannelProtection, int? bufferSize = null)
         {
             // for FTP, don't even bother
             if (Connection.Client.Protocol == FtpProtocol.Ftp)
                 return;
             var prot = Connection.Client.ChannelProtection.HasFlag(requiredChannelProtection) ? "P" : "C";
+            if (bufferSize.HasValue)
+                State["PBSZ"] = bufferSize.Value.ToString(CultureInfo.InvariantCulture);
             State["PROT"] = prot;
         }
 
@@ -616,15 +620,44 @@ namespace ArxOne.Ftp
         /// <param name="passive">if set to <c>true</c> [passive].</param>
         /// <param name="connectTimeout">The connect timeout.</param>
         /// <param name="readWriteTimeout">The read write timeout.</param>
-        /// <param name="mode">The mode.</param>
+        /// <param name="transferMode">The transfer mode.</param>
         /// <returns></returns>
-        public FtpStream OpenDataStream(bool passive, TimeSpan connectTimeout, TimeSpan readWriteTimeout, FtpTransferMode mode)
+        [Obsolete("Use full version instead")]
+        public FtpStream OpenDataStream(bool passive, TimeSpan connectTimeout, TimeSpan readWriteTimeout, FtpTransferMode transferMode)
         {
-            CheckProtection(FtpProtection.DataChannel);
-            SetTransferMode(mode);
+            return OpenDataStream(passive, connectTimeout, readWriteTimeout, transferMode, null);
+        }
+
+        /// <summary>
+        /// Opens the data stream.
+        /// </summary>
+        /// <param name="passive">if set to <c>true</c> [passive].</param>
+        /// <param name="connectTimeout">The connect timeout.</param>
+        /// <param name="readWriteTimeout">The read write timeout.</param>
+        /// <param name="transferMode">The transfer mode.</param>
+        /// <param name="streamMode">The stream mode.</param>
+        /// <returns></returns>
+        public FtpStream OpenDataStream(bool passive, TimeSpan connectTimeout, TimeSpan readWriteTimeout, FtpTransferMode transferMode, FtpStreamMode streamMode)
+        {
+            return OpenDataStream(passive, connectTimeout, readWriteTimeout, transferMode, (FtpStreamMode?)streamMode);
+        }
+
+        /// <summary>
+        /// Opens the data stream.
+        /// </summary>
+        /// <param name="passive">if set to <c>true</c> [passive].</param>
+        /// <param name="connectTimeout">The connect timeout.</param>
+        /// <param name="readWriteTimeout">The read write timeout.</param>
+        /// <param name="transferMode">The mode.</param>
+        /// <param name="streamMode">The stream mode.</param>
+        /// <returns></returns>
+        internal FtpStream OpenDataStream(bool passive, TimeSpan connectTimeout, TimeSpan readWriteTimeout, FtpTransferMode transferMode, FtpStreamMode? streamMode)
+        {
+            CheckProtection(FtpProtection.DataChannel, bufferSize: 0);
+            SetTransferMode(transferMode);
             FtpStream stream;
             if (passive)
-                stream = OpenPassiveDataStream(connectTimeout, readWriteTimeout);
+                stream = OpenPassiveDataStream(connectTimeout, readWriteTimeout, streamMode);
             else
                 stream = OpenActiveDataStream(connectTimeout, readWriteTimeout);
             return stream;
@@ -638,8 +671,9 @@ namespace ArxOne.Ftp
         /// </summary>
         /// <param name="connectTimeout">The connect timeout.</param>
         /// <param name="readWriteTimeout">The read write timeout.</param>
+        /// <param name="mode">The mode.</param>
         /// <returns></returns>
-        private FtpStream OpenPassiveDataStream(TimeSpan connectTimeout, TimeSpan readWriteTimeout)
+        private FtpStream OpenPassiveDataStream(TimeSpan connectTimeout, TimeSpan readWriteTimeout, FtpStreamMode? mode)
         {
             string host;
             int port;
@@ -662,10 +696,10 @@ namespace ArxOne.Ftp
             {
                 var socket = Connection.Client.ProxyConnect(new DnsEndPoint(host, port));
                 if (socket != null)
-                    return new FtpPassiveStream(socket, this);
+                    return new FtpPassiveStream(socket, this, mode, true);
             }
 
-            return OpenDirectPassiveDataStream(host, port, connectTimeout, readWriteTimeout);
+            return OpenDirectPassiveDataStream(host, port, connectTimeout, readWriteTimeout, mode);
         }
 
         /// <summary>
@@ -675,8 +709,10 @@ namespace ArxOne.Ftp
         /// <param name="port">The port.</param>
         /// <param name="connectTimeout">The connect timeout.</param>
         /// <param name="readWriteTimeout">The read write timeout.</param>
+        /// <param name="streamMode">The stream mode.</param>
         /// <returns></returns>
-        private FtpStream OpenDirectPassiveDataStream(string host, int port, TimeSpan connectTimeout, TimeSpan readWriteTimeout)
+        /// <exception cref="FtpTransportException">Socket error to " + host</exception>
+        private FtpStream OpenDirectPassiveDataStream(string host, int port, TimeSpan connectTimeout, TimeSpan readWriteTimeout, FtpStreamMode? streamMode)
         {
             var socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
             socket.SendTimeout = socket.ReceiveTimeout = (int)readWriteTimeout.TotalMilliseconds;
@@ -684,7 +720,7 @@ namespace ArxOne.Ftp
             if (!socket.Connected)
                 throw new FtpTransportException("Socket error to " + host);
 
-            return new FtpPassiveStream(socket, this);
+            return new FtpPassiveStream(socket, this, streamMode, true);
         }
 
         /// <summary>

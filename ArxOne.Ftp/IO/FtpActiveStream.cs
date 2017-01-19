@@ -22,15 +22,7 @@ namespace ArxOne.Ftp.IO
         private readonly EventWaitHandle _socketSet = new ManualResetEvent(false);
         private IOException _exception;
 
-        protected override Stream InnerStream
-        {
-            get
-            {
-                EnsureConnection();
-                return base.InnerStream;
-            }
-        }
-
+        /// <exception cref="FtpTransportException">Active stream did not get connection</exception>
         /// <summary>
         /// Initializes a new instance of the <see cref="FtpActiveStream"/> class.
         /// </summary>
@@ -42,6 +34,16 @@ namespace ArxOne.Ftp.IO
         {
             _connectTimeout = connectTimeout;
             socket.BeginAccept(OnSocketAccept, socket);
+        }
+
+        protected override Stream GetInnerStream()
+        {
+            EnsureConnection();
+            return base.GetInnerStream();
+        }
+
+        protected override void CheckLazySocket()
+        {
         }
 
         /// <summary>
@@ -66,7 +68,7 @@ namespace ArxOne.Ftp.IO
             var acceptedSocket = socket.EndAccept(ar);
             try
             {
-                SetSocket(acceptedSocket);
+                SetSocket(acceptedSocket, false);
             }
             catch (IOException e)
             {
