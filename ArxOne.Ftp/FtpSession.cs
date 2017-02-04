@@ -737,6 +737,16 @@ namespace ArxOne.Ftp
                 var match = PasvEx.Match(reply.Lines[0]);
                 host = string.Format("{0}.{1}.{2}.{3}", match.Groups["ip1"], match.Groups["ip2"], match.Groups["ip3"], match.Groups["ip4"]);
                 port = int.Parse(match.Groups["portHi"].Value) * 256 + Int32.Parse(match.Groups["portLo"].Value);
+
+
+                Regex regex = new Regex("(^10\\.)|(^172\\.1[6-9]\\.)|(^172\\.2[0-9]\\.)|(^172\\.3[0-1]\\.)|(^192\\.168\\.)|(^127\\.0\\.0\\.1)");
+                Match match_private_ip = regex.Match(host);
+                if (match_private_ip.Success)
+                {
+                    // Private IP? Are you kidding me? -> Using Server IP!
+                    host = Connection.Client.Uri.Host;
+                }
+
             }
 
             if (Connection.Client.ProxyConnect != null)
