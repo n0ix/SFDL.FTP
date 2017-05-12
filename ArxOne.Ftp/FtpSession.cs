@@ -327,14 +327,25 @@ namespace ArxOne.Ftp
             var credential = Connection.Client.Credential != null && !String.IsNullOrEmpty(Connection.Client.Credential.UserName)
                 ? Connection.Client.Credential
                 : new NetworkCredential("anonymous", Connection.Client.AnonymousPassword);
-            var userResult = Expect(SendCommand(ProtocolStream, "USER", credential.UserName), 331, 530);
+            var userResult = Expect(SendCommand(ProtocolStream, "USER", credential.UserName), 331, 530, 230);
             if (userResult.Code == 530)
                 throw new FtpAuthenticationException("No anonymous user allowed", userResult.Code);
-            var passResult = SendCommand(ProtocolStream, "PASS", credential.Password);
-            if (passResult.Code != 230)
-                throw new FtpAuthenticationException("Authentication failed for user " + credential.UserName, passResult.Code);
 
-            Connection.Client.OnConnectionInitialized();
+            if (userResult.Code == 230) {
+                //FTP doesen't need or wants a password for the anonymous user
+                Connection.Client.OnConnectionInitialized();
+            }
+
+            else{
+
+                var passResult = SendCommand(ProtocolStream, "PASS", credential.Password);
+                if (passResult.Code != 230)
+                    throw new FtpAuthenticationException("Authentication failed for user " + credential.UserName, passResult.Code);
+
+                Connection.Client.OnConnectionInitialized();
+
+            }
+               
         }
 
         /// <summary>
@@ -398,13 +409,20 @@ namespace ArxOne.Ftp
             {
                 // When 214 is unexpected, it may create a command/reply inconsistency (a 1-reply shift)
                 // so the best option here is to disconnect, it will reset the command/reply pairs
-                if (reply.Code == 214) {
+
+                if (reply.Code == 214)
+                {
                     Connection.Disconnect();
                     return reply;
                 }
                 else
                 {
-    
+
+                    if (reply.Code == 421) //ServerFull
+                            {
+                                ThrowException(reply);
+                            }
+
                     if (_count >= 3)
                     {
                         ThrowException(reply);
@@ -412,17 +430,17 @@ namespace ArxOne.Ftp
                     else
                     {
 
-                        if(reply.IssuedFtpCommand != null)
+                        if (reply.IssuedFtpCommand != null)
                         {
-      
-                            if(reply.IssuedFtpCommand != "PASV")
+
+                            if (reply.IssuedFtpCommand != "PASV")
                             {
                                 reply = SendCommand(ProtocolStream, reply.IssuedFtpCommand, reply.IssuedFtpCommandParameters);
                                 _count += 1;
                             }
                             else
                             {
-                                reply = SendCommand(ProtocolStream, "NOOP","");
+                                reply = SendCommand(ProtocolStream, "NOOP", "");
                                 _count += 1;
                             }
 
@@ -440,6 +458,25 @@ namespace ArxOne.Ftp
 
             return reply;
         }
+
+        ///// <summary>
+        ///// Expects the specified reply.
+        ///// </summary>
+        ///// <param name="reply">The reply.</param>
+        ///// <param name="codes">The codes.</param>
+        ///// <returns></returns>
+        //public FtpReply Expect(FtpReply reply, params int[] codes)
+        //{
+        //    if (!codes.Any(code => code == reply.Code))
+        //    {
+        //        // When 214 is unexpected, it may create a command/reply inconsistency (a 1-reply shift)
+        //        // so the best option here is to disconnect, it will reset the command/reply pairs
+        //        if (reply.Code == 214)
+        //            Connection.Disconnect();
+        //        ThrowException(reply);
+        //    }
+        //    return reply;
+        //}
 
         /// <summary>
         /// Expects the specified code.
