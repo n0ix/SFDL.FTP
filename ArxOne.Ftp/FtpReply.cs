@@ -51,20 +51,48 @@ namespace ArxOne.Ftp
         /// <returns></returns>
         internal bool ParseLine(string line)
         {
-            var lastLineMatch = LastLine.Match(line);
-            if (lastLineMatch.Success)
+            Match m;
+
+            if ((m = Regex.Match(line, "^(?<code>[0-9]{3}) (?<message>.*)$")).Success)
             {
-                Code = new FtpReplyCode(int.Parse(lastLineMatch.Groups["code"].Value));
-                AppendLine(lastLineMatch.Groups["line"].Value);
-                return false;
+                Code = new FtpReplyCode(int.Parse(m.Groups["code"].Value));
+                AppendLine(m.Groups["message"].Value);
+
+                //not the best - but it works
+                if (Lines.Length > 0 && Lines[0].ToString().Trim().ToLower().StartsWith("mode z")){
+
+                    Lines = null;
+                    return true;
+
+                }
+                else
+                {
+                    return false;
+                }
+
+                
+            }
+            else
+            {
+                AppendLine(line);
+                return true;
             }
 
-            var firstLineMatch = FirstLine.Match(line);
-            if (firstLineMatch.Success)
-                AppendLine(firstLineMatch.Groups["line"].Value);
-            else
-                AppendLine(line);
-            return true;
+                       
+            //var lastLineMatch = LastLine.Match(line);
+            //if (lastLineMatch.Success)
+            //{
+            //    Code = new FtpReplyCode(int.Parse(lastLineMatch.Groups["code"].Value));
+            //    AppendLine(lastLineMatch.Groups["line"].Value);
+            //    return false;
+            //}
+
+            //var firstLineMatch = FirstLine.Match(line);
+            //if (firstLineMatch.Success)
+            //    AppendLine(firstLineMatch.Groups["line"].Value);
+            //else
+            //    AppendLine(line);
+            //return true;
         }
 
         /// <summary>

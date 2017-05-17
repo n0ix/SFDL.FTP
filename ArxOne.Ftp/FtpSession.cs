@@ -393,72 +393,6 @@ namespace ArxOne.Ftp
             return false;
         }
 
-        /// <summary>
-        /// Expects the specified reply.
-        /// </summary>
-        /// <param name="reply">The reply.</param>
-        /// <param name="codes">The codes.</param>
-        /// <returns></returns>
-        public FtpReply Expect(FtpReply reply, params int[] codes)
-        {
-
-            int _count = 0;
-
-            while (!codes.Any(code => code == reply.Code))
-
-            {
-                // When 214 is unexpected, it may create a command/reply inconsistency (a 1-reply shift)
-                // so the best option here is to disconnect, it will reset the command/reply pairs
-
-                if (reply.Code == 214)
-                {
-                    Connection.Disconnect();
-                    return reply;
-                }
-                else
-                {
-
-                    if (reply.Code == 421) //ServerFull
-                            {
-                                ThrowException(reply);
-                            }
-
-                    if (_count >= 3)
-                    {
-                        ThrowException(reply);
-                    }
-                    else
-                    {
-
-                        if (reply.IssuedFtpCommand != null)
-                        {
-
-                            if (reply.IssuedFtpCommand != "PASV")
-                            {
-                                reply = SendCommand(ProtocolStream, reply.IssuedFtpCommand, reply.IssuedFtpCommandParameters);
-                                _count += 1;
-                            }
-                            else
-                            {
-                                reply = SendCommand(ProtocolStream, "NOOP", "");
-                                _count += 1;
-                            }
-
-                        }
-                        else
-                        {
-                            return reply;
-                        }
-
-                    }
-
-                }
-
-            }
-
-            return reply;
-        }
-
         ///// <summary>
         ///// Expects the specified reply.
         ///// </summary>
@@ -467,16 +401,82 @@ namespace ArxOne.Ftp
         ///// <returns></returns>
         //public FtpReply Expect(FtpReply reply, params int[] codes)
         //{
-        //    if (!codes.Any(code => code == reply.Code))
+
+        //    int _count = 0;
+
+        //    while (!codes.Any(code => code == reply.Code))
+
         //    {
         //        // When 214 is unexpected, it may create a command/reply inconsistency (a 1-reply shift)
         //        // so the best option here is to disconnect, it will reset the command/reply pairs
+
         //        if (reply.Code == 214)
+        //        {
         //            Connection.Disconnect();
-        //        ThrowException(reply);
+        //            return reply;
+        //        }
+        //        else
+        //        {
+
+        //            if (reply.Code == 421) //ServerFull
+        //                    {
+        //                        ThrowException(reply);
+        //                    }
+
+        //            if (_count >= 3)
+        //            {
+        //                ThrowException(reply);
+        //            }
+        //            else
+        //            {
+
+        //                //if (reply.IssuedFtpCommand != null)
+        //                //{
+
+        //                //    if (reply.IssuedFtpCommand != "PASV")
+        //                //    {
+        //                //        reply = SendCommand(ProtocolStream, reply.IssuedFtpCommand, reply.IssuedFtpCommandParameters);
+        //                //        _count += 1;
+        //                //    }
+        //                //    else
+        //                //    {
+        //                //        reply = SendCommand(ProtocolStream, "NOOP", "");
+        //                //        _count += 1;
+        //                //    }
+
+        //                //}
+        //                //else
+        //                //{
+        //                return reply;
+        //                //}
+
+        //            }
+
+        //        }
+
         //    }
+
         //    return reply;
         //}
+
+        /// <summary>
+        /// Expects the specified reply.
+        /// </summary>
+        /// <param name="reply">The reply.</param>
+        /// <param name="codes">The codes.</param>
+        /// <returns></returns>
+        public FtpReply Expect(FtpReply reply, params int[] codes)
+        {
+            if (!codes.Any(code => code == reply.Code))
+            {
+                // When 214 is unexpected, it may create a command/reply inconsistency (a 1-reply shift)
+                // so the best option here is to disconnect, it will reset the command/reply pairs
+                if (reply.Code == 214)
+                    Connection.Disconnect();
+                ThrowException(reply);
+            }
+            return reply;
+        }
 
         /// <summary>
         /// Expects the specified code.
