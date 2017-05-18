@@ -41,9 +41,6 @@ namespace ArxOne.Ftp
         /// <value>The lines.</value>
         public string[] Lines { get; private set; }
 
-        private static readonly Regex FirstLine = new Regex(@"^(?<code>\d{3})\-(?<line>.*)", RegexOptions.Compiled);
-        private static readonly Regex LastLine = new Regex(@"^(?<code>\d{3})\ (?<line>.*)", RegexOptions.Compiled);
-
         /// <summary>
         /// Parses the line.
         /// </summary>
@@ -58,19 +55,32 @@ namespace ArxOne.Ftp
                 Code = new FtpReplyCode(int.Parse(m.Groups["code"].Value));
                 AppendLine(m.Groups["message"].Value);
 
-                //not the best - but it works
-                if (Lines.Length > 0 && Lines[0].ToString().Trim().ToLower().StartsWith("mode z")){
+                if (Lines.Length > 0)
+                {
 
-                    Lines = null;
-                    return true;
+                    string lastline = "";
+                    string firstline = "";
+
+                    firstline = Lines[0].ToString().Trim().ToLower();
+
+                    lastline = Lines[Lines.Length - 1].ToString().Trim().ToLower();
+
+                    if (lastline.Equals ("end") && !firstline.StartsWith("211"))
+                    {
+                        Lines = null;
+                        return true;
+                    }
+                    else
+                    {
+                        return false;
+                    }
 
                 }
                 else
                 {
                     return false;
                 }
-
-                
+              
             }
             else
             {
@@ -78,21 +88,7 @@ namespace ArxOne.Ftp
                 return true;
             }
 
-                       
-            //var lastLineMatch = LastLine.Match(line);
-            //if (lastLineMatch.Success)
-            //{
-            //    Code = new FtpReplyCode(int.Parse(lastLineMatch.Groups["code"].Value));
-            //    AppendLine(lastLineMatch.Groups["line"].Value);
-            //    return false;
-            //}
-
-            //var firstLineMatch = FirstLine.Match(line);
-            //if (firstLineMatch.Success)
-            //    AppendLine(firstLineMatch.Groups["line"].Value);
-            //else
-            //    AppendLine(line);
-            //return true;
+                      
         }
 
         /// <summary>
