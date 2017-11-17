@@ -194,7 +194,7 @@ namespace ArxOne.Ftp
 
             // on connection a 220 message is expected
             // (the dude says hello)
-            Expect(ReadReply(), 220);
+            Expect(ReadReply(), 220,200);
 
             InitializeTransportEncoding();
         }
@@ -719,7 +719,7 @@ namespace ArxOne.Ftp
                 Match match_private_ip = regex.Match(host);
                 if (match_private_ip.Success)
                 {
-                    // Private IP? Are you kidding me? -> Using Server IP!
+                    // Address sent by the server for passive mode is not routable. Use the server address instead.
                     host = Connection.Client.Uri.Host;
                 }
 
@@ -766,13 +766,13 @@ namespace ArxOne.Ftp
         {
             var socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
             socket.SendTimeout = socket.ReceiveTimeout = (int)readWriteTimeout.TotalMilliseconds;
-            socket.Bind(new IPEndPoint(Connection.Client.HostAddress, 0));
+            socket.Bind(new IPEndPoint(Connection.Client.ActualActiveTransferHost , 0));
             var port = ((IPEndPoint)socket.LocalEndPoint).Port;
             if (Connection.Client.HasServerFeature("EPRT", this))
-                Expect(SendCommand(String.Format("EPRT |{0}|{1}|{2}|", Connection.Client.HostAddress.AddressFamily == AddressFamily.InterNetwork ? 1 : 2, Connection.Client.HostAddress, port)), 200);
+                Expect(SendCommand(String.Format("EPRT |{0}|{1}|{2}|", Connection.Client.ActualActiveTransferHost.AddressFamily == AddressFamily.InterNetwork ? 1 : 2, Connection.Client.ActualActiveTransferHost, port)), 200);
             else
             {
-                var addressBytes = Connection.Client.HostAddress.GetAddressBytes();
+                var addressBytes = Connection.Client.ActualActiveTransferHost.GetAddressBytes();
                 Expect(SendCommand(String.Format("PORT {0},{1},{2},{3},{4},{5}", addressBytes[0], addressBytes[1], addressBytes[2], addressBytes[3], port / 256, port % 256)), 200);
             }
 
