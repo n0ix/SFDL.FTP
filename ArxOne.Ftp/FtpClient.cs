@@ -26,6 +26,12 @@ namespace ArxOne.Ftp
     public class FtpClient : IDisposable
     {
         /// <summary>
+        /// Gets or sets the Name of the FTP Server
+        /// </summary>
+        /// <value>The URI.</value>
+        public string ServerName{ get; private set; }
+
+        /// <summary>
         /// Gets or sets the root URI.
         /// </summary>
         /// <value>The URI.</value>
@@ -394,6 +400,13 @@ namespace ArxOne.Ftp
                     availableSession.Connection.Dispose();
                 _availableConnections.Clear();
             }
+        }
+
+        /// <summary>
+        /// Allows to set ServerName
+        /// </summary>
+        public void SetServerName(string name) {
+            ServerName = name;
         }
 
         /// <summary>

@@ -184,6 +184,7 @@ namespace ArxOne.Ftp
             Connection.TransferMode = null;
 
             string message;
+            FtpReply helo;
             var protocolStream = ConnectTransport(connectTimeout, readWriteTimeout, out message);
             if (protocolStream == null)
                 throw new FtpTransportException("Socket not connected to " + Connection.Client.Uri.Host + ", message=" + message);
@@ -194,7 +195,11 @@ namespace ArxOne.Ftp
 
             // on connection a 220 message is expected
             // (the dude says hello)
-            Expect(ReadReply(), 220,200);
+
+            helo = ReadReply();
+            Expect(helo, 220,200);
+
+            Connection.Client.SetServerName(helo.Lines.FirstOrDefault().ToString());
 
             InitializeTransportEncoding();
         }
@@ -714,10 +719,9 @@ namespace ArxOne.Ftp
                 host = string.Format("{0}.{1}.{2}.{3}", match.Groups["ip1"], match.Groups["ip2"], match.Groups["ip3"], match.Groups["ip4"]);
                 port = int.Parse(match.Groups["portHi"].Value) * 256 + Int32.Parse(match.Groups["portLo"].Value);
 
-
                 Regex regex = new Regex("(^10\\.)|(^172\\.1[6-9]\\.)|(^172\\.2[0-9]\\.)|(^172\\.3[0-1]\\.)|(^192\\.168\\.)|(^127\\.0\\.0\\.1)");
                 Match match_private_ip = regex.Match(host);
-                if (match_private_ip.Success)
+                if (match_private_ip.Success || host == "0.0.0.0")
                 {
                     // Address sent by the server for passive mode is not routable. Use the server address instead.
                     host = Connection.Client.Uri.Host;
