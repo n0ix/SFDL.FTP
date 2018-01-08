@@ -638,7 +638,12 @@ namespace ArxOne.Ftp
                 return;
             var prot = Connection.Client.ChannelProtection.HasFlag(requiredChannelProtection) ? "P" : "C";
             if (bufferSize.HasValue)
+            {
                 State["PBSZ"] = bufferSize.Value.ToString(CultureInfo.InvariantCulture);
+                Expect(SendCommand("PBSZ", "0"), 200);
+            }
+
+            Expect(SendCommand("PROT", "P"), 200);
             State["PROT"] = prot;
         }
 

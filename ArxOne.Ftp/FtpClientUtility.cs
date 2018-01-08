@@ -402,8 +402,9 @@ namespace ArxOne.Ftp
         /// </summary>
         /// <param name="ftpClient">The FTP client.</param>
         /// <param name="path">The path.</param>
+        /// <param name="ftpSession">The FTP Session.</param>
         /// <returns></returns>
-        public static FtpEntry MlstEntry(this FtpClient ftpClient, FtpPath path)
+        public static FtpEntry MlstEntry(this FtpClient ftpClient, FtpPath path, FtpSession ftpSession = null)
         {
             return ParseMlsx(Mlst(ftpClient, path), path);
         }
@@ -413,10 +414,20 @@ namespace ArxOne.Ftp
         /// </summary>
         /// <param name="ftpClient">The FTP client.</param>
         /// <param name="path">The path.</param>
+        /// <param name="ftpSession">The FTP Session.</param>
         /// <returns></returns>
-        public static IList<string> Mlsd(this FtpClient ftpClient, FtpPath path)
+        public static IList<string> Mlsd(this FtpClient ftpClient, FtpPath path, FtpSession ftpSession = null)
         {
-            return ftpClient.Process(handle => ProcessMlsd(handle, path));
+
+            if ((ftpSession == null) == true)
+            {
+                return ftpClient.Process(handle => ProcessMlsd(handle, path));
+            }
+            else
+            {
+                return ftpClient.Process(handle => ProcessMlsd(ftpSession, path));
+            }
+
         }
 
         /// <summary>
@@ -424,10 +435,20 @@ namespace ArxOne.Ftp
         /// </summary>
         /// <param name="ftpClient">The FTP client.</param>
         /// <param name="path">The path.</param>
+        /// <param name="ftpSession">The FTP Session.</param>
         /// <returns></returns>
-        public static IEnumerable<FtpEntry> MlsdEntries(this FtpClient ftpClient, FtpPath path)
+        public static IEnumerable<FtpEntry> MlsdEntries(this FtpClient ftpClient, FtpPath path, FtpSession ftpSession = null)
         {
-            return Mlsd(ftpClient, path).Select(m => ParseMlsx(m, path));
+
+            if ((ftpSession == null) == true)
+            {
+                return Mlsd(ftpClient, path).Select(m => ParseMlsx(m, path));
+            }
+            else
+            { 
+                return Mlsd(ftpClient, path, ftpSession).Select(m => ParseMlsx(m, path));
+            }
+
         }
 
 
