@@ -19,7 +19,7 @@ namespace ArxOne.Ftp.Platform
             + @"(?<size>\d*)\s+"
             + @"(?<month>[a-zA-Z]{3})\s+"
             + @"(?<day>\d{1,2})\s+"
-            + @"(((?<hour>\d{2})\:(?<minute>\d{2}))|(?<year>\d{4}))\s+"
+            + @"(((?<hour>\d{1,2})\:(?<minute>\d{2}))|(?<year>\d{4}))\s+"
             + @"(?<name>.*)"
             , RegexOptions.CultureInvariant | RegexOptions.Compiled);
 

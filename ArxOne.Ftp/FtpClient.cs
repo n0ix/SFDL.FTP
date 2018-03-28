@@ -15,6 +15,7 @@ namespace ArxOne.Ftp
     using System.Security.Authentication;
     using System.Security.Cryptography.X509Certificates;
     using System.Text;
+    using System.Text.RegularExpressions;
     using System.Threading;
     using Platform;
 
@@ -185,6 +186,7 @@ namespace ArxOne.Ftp
                 else
                     _serverType = FtpServerType.Unknown;
             }
+
             return _serverType.Value;
         }
 
@@ -208,6 +210,48 @@ namespace ArxOne.Ftp
             if (_platform == null)
                 _platform = GetFtpPlatform(GetServerType(session), GetSystem(session));
             return _platform;
+        }
+
+
+        private FtpServerVendor _vendor;
+
+
+        /// <summary>
+        /// Gets the FTP server vendor.
+        /// </summary>
+        /// <value>
+        /// The FTP server vendor.
+        /// </value>
+        public FtpServerVendor Vendor {get { return GetVendor(null); } }
+
+        /// <summary>
+        /// Gets the server vendor.
+        /// </summary>
+        /// <param name="session">The FTP session.</param>
+        /// <returns></returns>
+        public FtpServerVendor GetVendor(FtpSession session)
+        {
+            if (ServerName != null && !String.IsNullOrWhiteSpace(ServerName))
+            {
+
+                var regex = new Regex(@"mlcboard.com ftp server.*",RegexOptions.IgnoreCase);
+
+                if(regex.Match(ServerName).Success)
+                {
+                    _vendor = FtpServerVendor.MLCBoardcom;
+                }
+                else
+                {
+                    _vendor = FtpServerVendor.Generic;
+                }
+
+            }
+            else
+            {
+                _vendor = FtpServerVendor.Generic;
+            }
+
+            return _vendor;
         }
 
         /// <summary>
