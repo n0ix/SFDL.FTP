@@ -650,46 +650,46 @@ namespace ArxOne.Ftp
         /// <summary>
         /// Opens the data stream.
         /// </summary>
-        /// <param name="passive">if set to <c>true</c> [passive].</param>
+        /// <param name="dataConnectionType">if set to <c>true</c> [passive].</param>
         /// <param name="connectTimeout">The connect timeout.</param>
         /// <param name="readWriteTimeout">The read write timeout.</param>
         /// <param name="transferMode">The transfer mode.</param>
         /// <returns></returns>
         [Obsolete("Use full version instead")]
-        public FtpStream OpenDataStream(bool passive, TimeSpan connectTimeout, TimeSpan readWriteTimeout, FtpTransferMode transferMode)
+        public FtpStream OpenDataStream(FtpDataConnectionType dataConnectionType, TimeSpan connectTimeout, TimeSpan readWriteTimeout, FtpTransferMode transferMode)
         {
-            return OpenDataStream(passive, connectTimeout, readWriteTimeout, transferMode, null);
+            return OpenDataStream(dataConnectionType, connectTimeout, readWriteTimeout, transferMode, null);
         }
 
         /// <summary>
         /// Opens the data stream.
         /// </summary>
-        /// <param name="passive">if set to <c>true</c> [passive].</param>
+        /// <param name="dataConnectionType">if set to <c>true</c> [passive].</param>
         /// <param name="connectTimeout">The connect timeout.</param>
         /// <param name="readWriteTimeout">The read write timeout.</param>
         /// <param name="transferMode">The transfer mode.</param>
         /// <param name="streamMode">The stream mode.</param>
         /// <returns></returns>
-        public FtpStream OpenDataStream(bool passive, TimeSpan connectTimeout, TimeSpan readWriteTimeout, FtpTransferMode transferMode, FtpStreamMode streamMode)
+        public FtpStream OpenDataStream(FtpDataConnectionType dataConnectionType, TimeSpan connectTimeout, TimeSpan readWriteTimeout, FtpTransferMode transferMode, FtpStreamMode streamMode)
         {
-            return OpenDataStream(passive, connectTimeout, readWriteTimeout, transferMode, (FtpStreamMode?)streamMode);
+            return OpenDataStream(dataConnectionType, connectTimeout, readWriteTimeout, transferMode, (FtpStreamMode?)streamMode);
         }
 
         /// <summary>
         /// Opens the data stream.
         /// </summary>
-        /// <param name="passive">if set to <c>true</c> [passive].</param>
+        /// <param name="dataConnectionType">if set to <c>true</c> [passive].</param>
         /// <param name="connectTimeout">The connect timeout.</param>
         /// <param name="readWriteTimeout">The read write timeout.</param>
         /// <param name="transferMode">The mode.</param>
         /// <param name="streamMode">The stream mode.</param>
         /// <returns></returns>
-        internal FtpStream OpenDataStream(bool passive, TimeSpan connectTimeout, TimeSpan readWriteTimeout, FtpTransferMode transferMode, FtpStreamMode? streamMode)
+        internal FtpStream OpenDataStream(FtpDataConnectionType dataConnectionType, TimeSpan connectTimeout, TimeSpan readWriteTimeout, FtpTransferMode transferMode, FtpStreamMode? streamMode)
         {
             CheckProtection(FtpProtection.DataChannel, bufferSize: 0);
             SetTransferMode(transferMode);
             FtpStream stream;
-            if (passive)
+            if (dataConnectionType == FtpDataConnectionType.PASV | dataConnectionType == FtpDataConnectionType.EPASV)
                 stream = OpenPassiveDataStream(connectTimeout, readWriteTimeout, streamMode);
             else
                 stream = OpenActiveDataStream(connectTimeout, readWriteTimeout);
@@ -710,7 +710,7 @@ namespace ArxOne.Ftp
         {
             string host;
             int port;
-            if (Connection.Client.HasServerFeature("EPSV", this))
+            if (Connection.Client.HasServerFeature("EPSV", this) && Connection.Client.DataConnectionType == FtpDataConnectionType.EPASV)
             {
                 var reply = Expect(SendCommand("EPSV"), 229);
                 var match = EpsvEx.Match(reply.Lines[0]);

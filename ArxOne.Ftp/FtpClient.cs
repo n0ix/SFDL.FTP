@@ -27,6 +27,12 @@ namespace ArxOne.Ftp
     public class FtpClient : IDisposable
     {
         /// <summary>
+        /// Gets or sets the DataConnectionType
+        /// </summary>
+        /// <value>The URI.</value>
+        public FtpDataConnectionType DataConnectionType { get; private set; }
+
+        /// <summary>
         /// Gets or sets the Name of the FTP Server
         /// </summary>
         /// <value>The URI.</value>
@@ -37,12 +43,6 @@ namespace ArxOne.Ftp
         /// </summary>
         /// <value>The URI.</value>
         public Uri Uri { get; private set; }
-
-        /// <summary>
-        /// Gets or sets a value indicating whether this <see cref="FtpClient"/> is in passive mode.
-        /// </summary>
-        /// <value><c>true</c> if passive; otherwise, <c>false</c>.</value>
-        public bool Passive { get; private set; }
 
         /// <summary>
         /// Gets the active transfer host (set by configuration).
@@ -373,9 +373,9 @@ namespace ArxOne.Ftp
         {
             if (parameters == null)
                 parameters = DefaultParameters;
-            if (!parameters.Passive && parameters.ProxyConnect != null)
+            if (!(parameters.DataConnectionType == FtpDataConnectionType.PASV | parameters.DataConnectionType == FtpDataConnectionType.EPASV) && parameters.ProxyConnect != null)
                 throw new InvalidOperationException("Active transfer mode only works without proxy server");
-            Passive = parameters.Passive;
+            DataConnectionType = parameters.DataConnectionType;
             ActiveTransferHost = parameters.ActiveTransferHost;
             ConnectTimeout = parameters.ConnectTimeout;
             ReadWriteTimeout = parameters.ReadWriteTimeout;

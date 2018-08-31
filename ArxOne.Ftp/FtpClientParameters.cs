@@ -39,10 +39,10 @@ namespace ArxOne.Ftp
         public TimeSpan SessionTimeout { get; set; }
 
         /// <summary>
-        /// Gets or sets a value indicating whether this <see cref="FtpClientParameters"/> is passive.
+        /// Gets or sets the DataConnectionType
         /// </summary>
-        /// <value><c>true</c> if passive; otherwise, <c>false</c>.</value>
-        public bool Passive { get; set; }
+        /// <value>The URI.</value>
+        public FtpDataConnectionType DataConnectionType { get; set; }
 
         /// <summary>
         /// Gets or sets the active transfer host.
@@ -109,7 +109,7 @@ namespace ArxOne.Ftp
             ReadWriteTimeout = TimeSpan.FromMinutes(10);
             SessionTimeout = TimeSpan.FromMinutes(2);
             SessionTimeout = TimeSpan.FromMinutes(2);
-            Passive = true;
+            DataConnectionType = FtpDataConnectionType.PASV;
             DefaultEncoding = System.Text.Encoding.UTF8;
             AnonymousPassword = "user@" + Environment.MachineName;
         }

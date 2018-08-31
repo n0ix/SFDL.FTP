@@ -29,7 +29,7 @@ namespace ArxOne.Ftp
         public static FtpStream OpenDataStream(this FtpSession session, FtpTransferMode mode)
         {
             var client = session.Connection.Client;
-            return session.OpenDataStream(client.Passive, client.ConnectTimeout, client.ReadWriteTimeout, mode, null);
+            return session.OpenDataStream(client.DataConnectionType, client.ConnectTimeout, client.ReadWriteTimeout, mode, null);
         }
 
         /// <summary>
@@ -42,7 +42,7 @@ namespace ArxOne.Ftp
         public static FtpStream OpenDataStream(this FtpSession session, FtpTransferMode transferMode, FtpStreamMode streamMode)
         {
             var client = session.Connection.Client;
-            return session.OpenDataStream(client.Passive, client.ConnectTimeout, client.ReadWriteTimeout, transferMode, streamMode);
+            return session.OpenDataStream(client.DataConnectionType, client.ConnectTimeout, client.ReadWriteTimeout, transferMode, streamMode);
         }
 
 

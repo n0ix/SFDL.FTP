@@ -76,6 +76,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CheckCertificateEventArgs.cs" />
+    <Compile Include="FtpDataConnectionType.cs" />
     <Compile Include="FtpServerVendor.cs" />
     <Compile Include="Exceptions\FtpAuthenticationException.cs" />
     <Compile Include="Exceptions\FtpFileException.cs" />
